@@ -55,13 +55,13 @@ func main() {
 		case 5:
 			//sortByScoreDiff(&tournaments, totalTim)
 		case 6:
-			//fmt.Print("Masukkan nama tim yang dicari: ")
-			//fmt.Scan(&namaTeam)
-			//sequentialSearch(tournaments, totalTim, namaTeam)
+			fmt.Print("Masukkan nama tim yang dicari: ")
+			fmt.Scan(&namaTeam)
+			sequentialSearch(tournaments, totalTim, namaTeam)
 		case 7:
-			//fmt.Print("Masukkan nama tim yang dicari: ")
-			//fmt.Scan(&namaTeam)
-			//binarySearch(tournaments, totalTim, namaTeam)
+			fmt.Print("Masukkan nama tim yang dicari: ")
+			fmt.Scan(&namaTeam)
+			binarySearch(tournaments, totalTim, namaTeam)
 		case 8:
 			//showStats(tournaments, totalTim)
 		case 0:
@@ -187,5 +187,69 @@ func deleteTeam(tournaments *[TMAX]team, totalTim *int, teamName string) {
 
 	if !found {
 		fmt.Println("Tim tidak ditemukan!")
+	}
+}
+
+// SEQUENTIAL SEARCH CARI NAMA TIM
+func sequentialSearch(tournaments [TMAX]team, totalTim int, namaTeam string) {
+	var ketemu int
+	var k, i int
+
+	ketemu = -1
+	k = 0
+	for ketemu == -1 && k < totalTim {
+		if tournaments[k].nama == namaTeam {
+			ketemu = k
+		}
+		k++
+	}
+
+	if ketemu != -1 {
+		fmt.Println("Tim yang dicari KETEMU! :")
+		fmt.Println("Nama Tim:", tournaments[ketemu].nama)
+		fmt.Println("Jumlah Menang:", tournaments[ketemu].menang)
+		fmt.Println("Jumlah Selisih Skor:", tournaments[ketemu].selisih)
+		fmt.Println("Daftar Player:")
+		for i = 0; i < PMAX; i++ {
+			fmt.Printf("- %s (ACS: %d)\n", tournaments[ketemu].pemain[i].nama, tournaments[ketemu].pemain[i].ACS)
+		}
+	} else {
+		fmt.Println("\nTim dengan nama", namaTeam, "gk ada beb")
+	}
+}
+
+// BINARY SEARCH CARI NAMA TIM
+func binarySearch(tournaments [TMAX]team, totalTim int, namaTeam string) {
+	var i int
+	var left, right, mid, hasil int
+	var ketemu bool
+
+	ketemu = false
+	left = 0
+	right = totalTim - 1
+	mid = (left + right) / 2
+
+	for left <= right && !ketemu {
+		if tournaments[mid].nama == namaTeam {
+			ketemu = true
+			hasil = mid
+		} else if tournaments[mid].nama < namaTeam {
+			left = mid + 1
+		} else {
+			right = mid - 1
+		}
+	}
+
+	if ketemu {
+		fmt.Println("Tim yang dicari KETEMU! :")
+		fmt.Println("Nama Tim:", tournaments[hasil].nama)
+		fmt.Println("Jumlah Menang:", tournaments[hasil].menang)
+		fmt.Println("Jumlah Selisih Skor:", tournaments[hasil].selisih)
+		fmt.Println("Daftar Player:")
+		for i = 0; i < PMAX; i++ {
+			fmt.Printf("- %s (ACS: %d)\n", tournaments[hasil].pemain[i].nama, tournaments[hasil].pemain[i].ACS)
+		}
+	} else {
+		fmt.Println("\nTim dengan nama", namaTeam, "gk ada beb")
 	}
 }
