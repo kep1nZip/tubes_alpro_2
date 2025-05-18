@@ -31,10 +31,11 @@ func main() {
 		fmt.Println("2. Edit Tim")
 		fmt.Println("3. Hapus Tim")
 		fmt.Println("4. Urutkan berdasarkan Menang (Selection Sort)")
-		fmt.Println("5. Urutkan berdasarkan Selisih Skor (Insertion Sort)")
+		fmt.Println("5. Urutkan berdasarkan Menang (Insertion Sort)")
 		fmt.Println("6. Cari Tim (Sequential Search)")
 		fmt.Println("7. Cari Tim (Binary Search)")
 		fmt.Println("8. Tampilkan Statistik")
+		fmt.Println("9. Update Klasemen")
 		fmt.Println("0. Keluar")
 		fmt.Print("Pilih: ")
 		fmt.Scan(&n)
@@ -51,9 +52,11 @@ func main() {
 			fmt.Scan(&namaTeam)
 			deleteTeam(&tournaments, &totalTim, namaTeam)
 		case 4:
-			//sortByWins(&tournaments, totalTim) <- INI BISA DIGANTI VARIABLEnya, ALGORITMAnya, DLL-nya KALO MAU YAK! (shout out to case 4-8)
+			winSelection(&tournaments, totalTim)
+			print(tournaments, totalTim)
 		case 5:
-			//sortByScoreDiff(&tournaments, totalTim)
+			winInsertion(&tournaments, totalTim)
+			print(tournaments, totalTim)
 		case 6:
 			fmt.Print("Masukkan nama tim yang dicari: ")
 			fmt.Scan(&namaTeam)
@@ -63,12 +66,14 @@ func main() {
 			fmt.Scan(&namaTeam)
 			binarySearch(tournaments, totalTim, namaTeam)
 		case 8:
-			//showStats(tournaments, totalTim)
+			showStats(tournaments, totalTim)
+		case 9:
+			updateKlasemen(&tournaments, totalTim)
 		case 0:
 			fmt.Println("Keluar dari aplikasi...")
 			return
 		default:
-			fmt.Println("BUNYAMIN GOBLOK, YANG BENER LAH INPUTNYA WKWKWKWK")
+			fmt.Println("Masukan Kembali Pilihan Yang Tertera")
 		}
 	}
 }
@@ -91,7 +96,8 @@ func addTeam(tournaments *[TMAX]team, totalTim *int) {
 		fmt.Printf("Player %d:\n", i+1)
 		fmt.Print("Nama: ")
 		fmt.Scan(&t.pemain[i].nama)
-		fmt.Print("Total SCA: ")
+		fmt.Print("Total ACS: ")
+		fmt.Println("0 - 400")
 		fmt.Scan(&t.pemain[i].ACS)
 	}
 
@@ -105,12 +111,27 @@ func addTeam(tournaments *[TMAX]team, totalTim *int) {
 	fmt.Println("Tim beserta 5 pemain berhasil ditambahkan!")
 }
 
+//cetak
+func print(tournaments [TMAX]team, totalteam int) {
+	var i int
+	if totalTim == 0 {
+		return
+	}
+
+	fmt.Printf("| %-15s | %-15s | %-15s |\n", "Nama Tim", "Menang", "Selisih")
+	fmt.Print("-------------------------------------------------------\n")
+	for i = 0; i < totalteam; i++ {
+		fmt.Printf("| %-15s | %-15d | %-15d |\n", tournaments[i].nama, tournaments[i].menang, tournaments[i].selisih)
+	}
+
+}
+
 // EDIT TEAM
 func editTeam(tournaments *[TMAX]team, totalTim int, namaTeam string) {
 	var ketemu bool
 	var i, j int
 	var playerBaru, timBaru string
-	var ACSUpdate int
+	var ACSUpdate, menangBaru, selisihBaru int
 
 	if totalTim == 0 {
 		fmt.Println("Belum ada data tim!")
@@ -146,10 +167,15 @@ func editTeam(tournaments *[TMAX]team, totalTim int, namaTeam string) {
 			}
 
 			fmt.Print("Jumlah kemenangan baru (0 jika tidak ingin mengubah): ")
-			fmt.Scan(&tournaments[i].menang)
+			fmt.Scan(&menangBaru)
+			if menangBaru != 0 {
+				tournaments[i].menang = menangBaru
+			}
 			fmt.Print("Selisih skor baru (0 jika tidak ingin mengubah): ")
-			fmt.Scan(&tournaments[i].selisih)
-
+			fmt.Scan(&selisihBaru)
+			if selisihBaru != 0 {
+				tournaments[i].selisih = selisihBaru
+			}
 			fmt.Println("Tim berhasil diperbarui!")
 			ketemu = true
 		}
@@ -172,17 +198,16 @@ func deleteTeam(tournaments *[TMAX]team, totalTim *int, teamName string) {
 	}
 
 	found = false
-	i = 0
-	for i < *totalTim && !found {
+	for i = 0; i < *totalTim; i++ {
 		if tournaments[i].nama == teamName {
 			for j = i; j < *totalTim-1; j++ {
 				tournaments[j] = tournaments[j+1]
 			}
-			*totalTim--
+			*totalTim = *totalTim - 1
 			fmt.Println("Tim berhasil dihapus!")
 			found = true
+			i = *totalTim
 		}
-		i++
 	}
 
 	if !found {
@@ -214,7 +239,7 @@ func sequentialSearch(tournaments [TMAX]team, totalTim int, namaTeam string) {
 			fmt.Printf("- %s (ACS: %d)\n", tournaments[ketemu].pemain[i].nama, tournaments[ketemu].pemain[i].ACS)
 		}
 	} else {
-		fmt.Println("\nTim dengan nama", namaTeam, "gk ada beb")
+		fmt.Println("\nTim dengan nama", namaTeam, "tidak terdaftar")
 	}
 }
 
@@ -223,6 +248,11 @@ func binarySearch(tournaments [TMAX]team, totalTim int, namaTeam string) {
 	var i int
 	var left, right, mid, hasil int
 	var ketemu bool
+
+	if totalTim == 0 {
+		fmt.Println("Belum ada data tim!")
+		return
+	}
 
 	ketemu = false
 	left = 0
@@ -250,6 +280,140 @@ func binarySearch(tournaments [TMAX]team, totalTim int, namaTeam string) {
 			fmt.Printf("- %s (ACS: %d)\n", tournaments[hasil].pemain[i].nama, tournaments[hasil].pemain[i].ACS)
 		}
 	} else {
-		fmt.Println("\nTim dengan nama", namaTeam, "gk ada beb")
+		fmt.Println("\nTim dengan nama", namaTeam, "tidak terdaftar")
 	}
+}
+
+// KLASEMEN
+func updateKlasemen(tournaments *[TMAX]team, totalteam int) {
+	var namaTeam string
+	var menangBaru, selisihBaru int
+	var found bool
+	var i int
+
+	if totalTim == 0 {
+		fmt.Println("Belum ada data!")
+		return
+	}
+
+	fmt.Print("Nama tim: ")
+	fmt.Scan(&namaTeam)
+
+	found = false
+	i = 0
+	for i < totalTim && !found {
+		if tournaments[i].nama == namaTeam {
+			fmt.Printf("Data saat ini:\nMenang: %d\nSelisih: %d\n", tournaments[i].menang, tournaments[i].selisih)
+			fmt.Print("Tambah Jumlah kemenangan: ")
+			fmt.Scan(&menangBaru)
+			fmt.Print("Tambah selisih skor: ")
+			fmt.Scan(&selisihBaru)
+
+			tournaments[i].menang = tournaments[i].menang + menangBaru
+			tournaments[i].selisih = tournaments[i].selisih + selisihBaru
+
+			fmt.Println("Klasemen diperbarui")
+			fmt.Printf("Data baru:\nMenang: %d\nSelisih: %d\n", tournaments[i].menang, tournaments[i].selisih)
+			found = true
+		}
+		i++
+	}
+	if !found {
+		fmt.Println("Tim tidak ada")
+	}
+}
+
+// menang disorting menggunakan Selection sort
+func winSelection(tournaments *[TMAX]team, totalteam int) {
+	var i, idx, pass int
+	var temp team
+
+	if totalTim == 0 {
+		fmt.Println("Belum ada data tim!")
+		return
+	}
+
+	pass = 1
+	for pass < totalteam {
+		idx = pass - 1
+		i = pass
+		for i < totalteam {
+			if tournaments[i].menang > tournaments[idx].menang {
+				idx = i
+			} else if tournaments[i].menang == tournaments[idx].menang {
+				if tournaments[i].selisih > tournaments[idx].selisih {
+					idx = i
+				}
+			}
+			i = i + 1
+		}
+		temp = tournaments[pass-1]
+		tournaments[pass-1] = tournaments[idx]
+		tournaments[idx] = temp
+		pass = pass + 1
+	}
+}
+
+// menang disorting menggunakan Insertion sort
+func winInsertion(tournaments *[TMAX]team, totalTim int) {
+	var i, pass int
+	var temp team
+	var req1, req2 bool
+
+	if totalTim == 0 {
+		fmt.Println("Belum ada data tim!")
+		return
+	}
+
+	pass = 1
+
+	for pass < totalTim {
+		i = pass
+		temp = tournaments[pass]
+		req1 = tournaments[i-1].menang < temp.menang
+		req2 = tournaments[i-1].menang == temp.menang && tournaments[i-1].selisih < temp.selisih
+
+		for i > 0 && req1 || req2 {
+			tournaments[i] = tournaments[i-1]
+			i = i - 1
+		}
+
+		tournaments[i] = temp
+		pass = pass + 1
+	}
+}
+
+//menampilkan statistik
+func showStats(tournaments [TMAX]team, totalTim int) {
+	var MVP, p player
+	var i, j int
+
+	if totalTim == 0 {
+		fmt.Println("Belum ada data tim!")
+		return
+	}
+
+	MVP.ACS = -1
+	for i = 0; i < totalTim; i++ {
+		fmt.Printf("Nama Tim: %s\n", tournaments[i].nama)
+		fmt.Printf("Total Menang: %d\n", tournaments[i].menang)
+		fmt.Printf("Total Selisih: %d\n", tournaments[i].selisih)
+		fmt.Println()
+
+		for j = 0; j < PMAX; j++ {
+			fmt.Printf("Nama Pemain: %s\n", tournaments[i].pemain[j].nama)
+			fmt.Printf("Total ACS (Avarage Combat Score): %d\n", tournaments[i].pemain[j].ACS)
+			fmt.Println()
+			p = tournaments[i].pemain[j]
+			if p.ACS > MVP.ACS {
+				MVP = p
+			}
+		}
+
+	}
+
+	fmt.Print("===Pemain Terbaik===\n")
+	fmt.Printf("Pemain: %s\n", MVP.nama)
+	fmt.Printf("Pemain: %d\n", MVP.ACS)
+
 }
