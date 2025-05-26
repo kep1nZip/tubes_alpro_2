@@ -91,7 +91,7 @@ func addTeam(tournaments *[TMAX]team, totalTim *int) {
 	fmt.Println("|===========TAMBAH TIM============|")
 
 	fmt.Println()
-	fmt.Print("Masukkan Nama Tim (Pakai '_' untuk spasi, Contoh: Apple_Team): ")
+	fmt.Print("Masukkan Nama Tim (Pakai '_' untuk spasi, Contoh: Appel_Team): ")
 	fmt.Scan(&t.nama)
 
 	fmt.Println()
@@ -136,14 +136,15 @@ func addTeam(tournaments *[TMAX]team, totalTim *int) {
 	for !valid {
 		fmt.Printf("Konfirmasi Untuk Menambahkan Tim '%s'? (y/n): ", t.nama)
 		fmt.Scan(&confirm)
-		if confirm == "n" || confirm == "N" {
+		if confirm == "n" || confirm == "N" || confirm == "No" || confirm == "no" {
 			fmt.Println("Data Tidak Disimpan")
 			valid = true
-		} else if confirm == "y" || confirm == "Y" {
+		} else if confirm == "y" || confirm == "Y" || confirm == "Yes" || confirm == "yes" {
 			valid = true
 			tournaments[*totalTim] = t
 			*totalTim++
 			fmt.Println("Tim beserta 5 pemain berhasil ditambahkan!")
+			fmt.Printf("Sekarang ada %d Tim Terdaftar", *totalTim)
 		} else {
 			fmt.Println("Input Tidak Valid, Tolong Masukan Input Yang Diminta")
 		}
@@ -510,6 +511,7 @@ func showStats(tournaments [TMAX]team, totalTim int) {
 	var MVP, p player
 	var i, j int
 	var MVPteam team
+	var req1, req2, req3 bool
 
 	if totalTim == 0 {
 		fmt.Println("Belum ada data tim!")
@@ -530,24 +532,15 @@ func showStats(tournaments [TMAX]team, totalTim int) {
 			fmt.Printf("Total ACS (Average Combat Score): %d\n", tournaments[i].pemain[j].ACS)
 			fmt.Println()
 			p = tournaments[i].pemain[j]
+			req1 = tournaments[i].menang > MVPteam.menang
+			req2 = tournaments[i].menang == MVPteam.menang && tournaments[i].selisih > MVPteam.selisih
+			req3 = (tournaments[i].menang == MVPteam.menang) && (tournaments[i].selisih == MVPteam.selisih) && tournaments[i].totalACS > MVPteam.totalACS
 			if p.ACS > MVP.ACS {
 				MVP = p
 				MVPteam = tournaments[i]
-			} else if p.ACS == MVP.ACS {
-				if tournaments[i].menang > MVPteam.menang {
-					MVP = p
-					MVPteam = tournaments[i]
-				} else if tournaments[i].menang == MVPteam.menang {
-					if tournaments[i].selisih > MVPteam.selisih {
-						MVP = p
-						MVPteam = tournaments[i]
-					}
-				} else if (tournaments[i].menang == MVPteam.menang) && (tournaments[i].selisih == MVPteam.selisih) {
-					if tournaments[i].totalACS > MVPteam.totalACS {
-						MVP = p
-						MVPteam = tournaments[i]
-					}
-				}
+			} else if p.ACS == MVP.ACS && req1 || req2 || req3 {
+				MVP = p
+				MVPteam = tournaments[i]
 			}
 		}
 
